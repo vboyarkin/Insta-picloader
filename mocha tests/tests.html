@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+  <!-- mocha & chai -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mocha/3.2.0/mocha.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chai/3.5.0/chai.js"></script>
+
+  <script>
+    // BDD tests style
+    mocha.setup('bdd');
+  </script>
+
+  
+  <!-- mocha styles -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mocha/3.2.0/mocha.css">
+
+</head>
+
+<body>
+
+  <script src="..\content.js"></script>
+  <script src="tests.js"></script>
+
+  <!-- tests' results container -->
+  <div id="mocha"></div>
+
+  <script>
+    mocha.run();
+  </script>
+
+</body>
+</html>

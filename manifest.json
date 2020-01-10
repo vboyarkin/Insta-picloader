@@ -1,0 +1,33 @@
+{
+
+	"manifest_version": 2,
+	"name": "Instagram Picloader",
+	"version": "1.0",
+   
+	"icons": {
+	  "48": "img/extension-icon.png"
+	},
+  
+	"applications": {
+	  "gecko": {
+		"id": "nyaaqq@gmail.com",
+		"strict_min_version": "45.0"
+	  }
+	},
+  
+	"content_scripts": [
+	  {
+		"matches": ["*://*.instagram.com/*"],
+		"js": ["mousetrap.min.js", "content.js"]
+	  }
+	],
+	"background": {
+		"scripts": ["background-script.js"]	
+	},
+
+	"permissions": [
+		"downloads",
+		"downloads.open"
+	]
+  
+}
