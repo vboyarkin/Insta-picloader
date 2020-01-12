@@ -1,6 +1,8 @@
 'use strict'
 
-
+/* 
+TODO: Adds buttons to posts
+ */
 class InstaPicloader {
     _instaObserver = new InstaObserver(this._targetNodeCallback, this._newPostCallback);
 
@@ -14,11 +16,13 @@ class InstaPicloader {
 }
 
 /* 
-Observes posts container node's childs, 
-adds download buttons.
+Observes posts container node's childs,
+calls _targetNodeCallback() on following link
+      _newPostCallback()    on new post in container
  */
 class InstaObserver {
     _mutationObserver = new MutationObserver(this._observerCallback.bind(this));
+    _urlChangeObserver = new UrlChangeObserver(this._urlObserverCallback.bind(this));
     _targetNodeCallback;
     _newPostCallback;
 
@@ -45,6 +49,7 @@ class InstaObserver {
         this._targetNodeCallback(targetNode);
 
         this._mutationObserver.observe(targetNode, {childList: true});
+        this._urlChangeObserver.observe();
     }
 
     /* 
@@ -52,6 +57,7 @@ class InstaObserver {
      */
     disconnect() {
         this._mutationObserver.disconnect();
+        this._urlChangeObserver.disconnect();
     }
     
     /* 
@@ -71,6 +77,15 @@ class InstaObserver {
             }
         }
     }
+
+    /* 
+    UrlChangeObserver callback.
+    Restarts observing.
+     */
+    _urlObserverCallback() {
+        this.restart();
+    }
+
     /* 
     FIXME
 
@@ -113,6 +128,46 @@ class InstaObserver {
             return "profile";
     }
 }
+
+/* 
+Checks href every second, 
+calls callback if href has changed
+ */
+class UrlChangeObserver {
+    _timer = null;
+    _callback;
+    _prevUrl;
+
+    constructor(callback) {
+        this._callback = callback;
+    }
+
+    /* 
+    Starts observing ulr change
+     */
+    observe() {
+        this._timer = setInterval(this._intervalCallback.bind(this), 1000);
+    }
+
+    /* 
+    Stops observing url change
+     */
+    disconnect() {
+        if (this._timer != null)
+            clearInterval(this._timer);
+    }
+
+    /* 
+    Calls every second
+     */
+    _intervalCallback() {
+        if (this._prevUrl != window.location.href){
+            this._prevUrl = window.location.href;
+            this._callback();
+        }
+    }
+}
+
 /* 
 Sends message to background-script.js
  */
