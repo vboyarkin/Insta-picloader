@@ -44,10 +44,10 @@ class InstaPicloader {
 
         let buttonBar = post.querySelector("div.eo2As > section > span.wmtNn");
 
-        buttonBar.appendChild(this._getDownloadButton())
+        buttonBar.appendChild(this._getFeedDownloadButton(post))
     }
 
-    _getFeedDownloadButton() {
+    _getFeedDownloadButton(post) {
         let innerSpan = document.createElement('span');
         innerSpan.style.backgroundImage = 'url(img/download-icon.png)';
         innerSpan.setAttribute('aria-label', 'Download image');
@@ -57,7 +57,9 @@ class InstaPicloader {
 
         let spanWrapper = document.createElement('span');
 
-        // TODO: add onclick
+        button.addEventListener('click', () => this._downloadImg(post));
+        return button
+    }
         
         return spanWrapper;
     }
@@ -224,6 +226,12 @@ function downloadImg(url, filename, metadata) {
         url: url,
         filename: filename,
         metadata: metadata,
+    });
+}
+
+function wait() {
+    return new Promise((resolve) => {
+       setTimeout(() => resolve(), 300); 
     });
 }
 
