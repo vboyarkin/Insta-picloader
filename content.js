@@ -4,14 +4,62 @@
 TODO: Adds buttons to posts
  */
 class InstaPicloader {
-    _instaObserver = new InstaObserver(this._targetNodeCallback, this._newPostCallback);
+    _instaObserver = new InstaObserver(this._targetNodeCallback.bind(this), this._newPostCallback.bind(this));
+    _pathType;
 
-    _targetNodeCallback(targetNode) {
-        console.log('target node!')
+    /* 
+    Calls when document's load or after following links.
+
+    Calls _newPostCallback(post) on every post.
+     */
+    _targetNodeCallback(targetNode, pathType) {
+        this._pathType = pathType;
+
+        for (let post of targetNode.children) {
+            this._newPostCallback(post);
+    }
     }
 
+    /* 
+    Calls proper process method for the post.
+     */
     _newPostCallback(post) {
-        console.log('new post!')
+        switch(this._pathType){
+            case "feed":
+                this._processFeedPost(post); 
+                break;
+
+            case "stories":
+                this._processStorie(post);
+                break;
+                
+            case "profile":
+                this._processProfilePost(post);
+                break;
+        }
+    }
+    _processFeedPost(post) {
+        if (post.tagName != "ARTICLE")
+            return;
+
+        let buttonBar = post.querySelector("div.eo2As > section > span.wmtNn");
+
+        buttonBar.appendChild(this._getDownloadButton())
+    }
+
+    _getFeedDownloadButton() {
+        let innerSpan = document.createElement('span');
+        innerSpan.style.backgroundImage = 'url(img/download-icon.png)';
+        innerSpan.setAttribute('aria-label', 'Download image');
+
+        let button = document.createElement('button');
+        button.appendChild(innerSpan);
+
+        let spanWrapper = document.createElement('span');
+
+        // TODO: add onclick
+        
+        return spanWrapper;
     }
 }
 
@@ -27,7 +75,7 @@ class InstaObserver {
     _newPostCallback;
 
     /* 
-    targetNodeCallback(targetNode);
+    targetNodeCallback(targetNode, pathType);
     Calls when document's load or after following links.
 
     newPostCallback(post)
@@ -46,7 +94,7 @@ class InstaObserver {
     observe() {
         let targetNode = this._getTargetNode();
 
-        this._targetNodeCallback(targetNode);
+        this._targetNodeCallback(targetNode, this._getPathType());
 
         this._mutationObserver.observe(targetNode, {childList: true});
         this._urlChangeObserver.observe();
@@ -101,7 +149,7 @@ class InstaObserver {
 
             // FIXME
             case "stories":
-                return;
+                return document.querySelector(".yS4wN");
         }
     }
 
