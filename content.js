@@ -93,8 +93,8 @@ class InstaObserver {
     /* 
     Starts observing childs of target node.
      */ 
-    observe() {
-        let targetNode = this._getTargetNode();
+    async observe() {
+        let targetNode = await this._getTargetNode();
 
         this._targetNodeCallback(targetNode, this._getPathType());
 
@@ -137,11 +137,12 @@ class InstaObserver {
     }
 
     /* 
-    FIXME
+    Returns promise that resolves with posts-container node.
 
-    Returns posts container node.
+    If there's no target node, waits 300 ms and tries again.
      */
-    _getTargetNode() {
+    async _getTargetNode() {
+        try {
         switch (this._getPathType()) {
             case "feed":
                 return document.querySelector("div.cGcGK > div > div");
@@ -149,9 +150,14 @@ class InstaObserver {
             case "profile":
                 return document.querySelectorAll("article.ySN3v")[1].querySelector("div > div");
 
-            // FIXME
             case "stories":
                 return document.querySelector(".yS4wN");
+        }
+    }
+        catch { 
+            let w = await wait();
+
+            return this._getTargetNode();
         }
     }
 
