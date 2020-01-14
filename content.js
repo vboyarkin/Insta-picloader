@@ -38,11 +38,23 @@ class InstaPicloader {
                 break;
         }
     }
+
+    //#region  post processing
+
+    /* 
+    Checks if the post:
+    1) is an article,
+    2) already has download button (why this happens?).
+
+    If ok, gets button container and adds download button. 
+     */
     _processFeedPost(post) {
-        if (post.tagName != "ARTICLE")
+        // The post should be an article
+        if (post.tagName != "ARTICLE" || _hasDownloadButton(post))
             return;
 
-        let buttonBar = post.querySelector("div.eo2As > section > span.wmtNn");
+        this._getButtonContainer(post).appendChild(this._getFeedDownloadButton(post));
+    }
 
         buttonBar.appendChild(this._getFeedDownloadButton(post))
     }
@@ -53,6 +65,9 @@ class InstaPicloader {
         innerSpan.setAttribute('aria-label', 'Download image');
 
         let button = document.createElement('button');
+        button.style.minWidth = '40px';
+        button.style.minHeight = '40px';
+        
         button.appendChild(innerSpan);
 
         let spanWrapper = document.createElement('span');
@@ -61,8 +76,9 @@ class InstaPicloader {
         return button
     }
         
-        return spanWrapper;
-    }
+    
+
+    //#endregion
 }
 
 /* 
