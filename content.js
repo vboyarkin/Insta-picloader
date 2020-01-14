@@ -17,11 +17,13 @@ class InstaPicloader {
 
         for (let post of targetNode.children) {
             this._newPostCallback(post);
-    }
+        }
     }
 
     /* 
     Calls proper process method for the post.
+
+    TODO: "profile post"
      */
     _newPostCallback(post) {
         switch(this._pathType){
@@ -61,7 +63,7 @@ class InstaPicloader {
      */
     _processFeedPost(post) {
         // The post should be an article
-        if (post.tagName != "ARTICLE" || _hasDownloadButton(post))
+        if (post.tagName != "ARTICLE" || this._hasDownloadButton(post))
             return;
 
         this._getButtonContainer(post).appendChild(this._getFeedDownloadButton(post));
@@ -93,7 +95,7 @@ class InstaPicloader {
     _hasDownloadButton(post) {
         switch(this._pathType){
             case "feed":
-                return _getButtonContainer(post).children.length > 1;
+                return this._getButtonContainer(post).children.length > 1;
 
             case "stories":
                 return;
@@ -103,7 +105,49 @@ class InstaPicloader {
         }
     }
 
-    
+    /* 
+    Returns:
+    1. Url of the image,
+    2. Profile name,
+    3. Time of the post,
+    4. Link to profile.
+
+    TODO: make it work with "stories" and "profile" and "profile post"
+     */
+    _getMetadata(post) {
+        switch(this._pathType){
+
+            case "feed":     
+            case "profile post":
+                let time = post.querySelector('time');            
+                let img = post.querySelectorAll('img')[1];
+
+                return {
+                    imgUrl:         img.currentSrc,
+                    profileName:    post.querySelector('header a').title,
+                    time:           formatTime(time),
+                    profileLink:    time.parentElement.href,
+                };
+
+            case "stories":
+                return;
+                
+            case "profile":
+                return;
+        }
+
+        /* Local function.
+        Extracts time from <time> and make it valid for filename.
+         */
+        function formatTime(time) {
+            return time
+                .getAttribute('datetime')
+                .substring(0,19)
+                .replace('T', '_')
+                .split(':').join('-');
+        }
+    }
+        
 
     _getFeedDownloadButton(post) {
         let innerSpan = document.createElement('span');
@@ -119,7 +163,7 @@ class InstaPicloader {
         button.addEventListener('click', () => this._downloadImg(post));
         return button
     }
-        
+
     
 
     //#endregion
@@ -200,20 +244,25 @@ class InstaObserver {
     Returns promise that resolves with posts-container node.
 
     If there's no target node, waits 300 ms and tries again.
+
+    TODO: "profile post"
      */
     async _getTargetNode() {
         try {
-        switch (this._getPathType()) {
-            case "feed":
-                return document.querySelector("div.cGcGK > div > div");
+            switch (this._getPathType()) {
+                case "feed":
+                    return document.querySelector("div.cGcGK > div > div");
+    
+                case "profile":
+                    return document.querySelectorAll("article.ySN3v")[1].querySelector("div > div");
+    
+                case "profile post":
+                        return;
 
-            case "profile":
-                return document.querySelectorAll("article.ySN3v")[1].querySelector("div > div");
-
-            case "stories":
-                return document.querySelector(".yS4wN");
-        }
-    }
+                case "stories":
+                    return document.querySelector(".yS4wN");
+            }
+        } 
         catch { 
             let w = await wait();
 
@@ -223,7 +272,9 @@ class InstaObserver {
 
     /* 
     Current path type.
-    Returns "feed" or "stories" or "profile" .
+    Returns "feed" or "stories" or "profile".
+
+    TODO: "profile post"
      */
     _getPathType() {
         let path = window.location.pathname.slice(1);
@@ -282,17 +333,6 @@ class UrlChangeObserver {
             this._callback();
         }
     }
-}
-
-/* 
-Sends message to background-script.js
- */
-function downloadImg(url, filename, metadata) {
-    browser.runtime.sendMessage({
-        url: url,
-        filename: filename,
-        metadata: metadata,
-    });
 }
 
 function wait() {
