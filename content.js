@@ -39,6 +39,17 @@ class InstaPicloader {
         }
     }
 
+    /* 
+    Gets all data, 
+    sends message to background-script.js
+     */
+    _downloadImg(post) {
+        let metadata = this._getMetadata(post);
+        console.log(metadata);
+
+        browser.runtime.sendMessage(metadata);
+    }
+
     //#region  post processing
 
     /* 
