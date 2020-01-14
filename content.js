@@ -56,8 +56,43 @@ class InstaPicloader {
         this._getButtonContainer(post).appendChild(this._getFeedDownloadButton(post));
     }
 
-        buttonBar.appendChild(this._getFeedDownloadButton(post))
+    /* 
+    Returns button container for this _pathType
+
+    TODO: "stories" and "profile" cases.
+     */
+    _getButtonContainer(post) {
+        switch(this._pathType){
+            case "feed":
+                return post.querySelector("div.eo2As > section > span.wmtNn");
+
+            case "stories":
+                return;
+                
+            case "profile":
+                return;
+        }
     }
+
+    /* 
+    Returns true if post has download button
+
+    TODO: "stories" and "profile" cases.
+     */
+    _hasDownloadButton(post) {
+        switch(this._pathType){
+            case "feed":
+                return _getButtonContainer(post).children.length > 1;
+
+            case "stories":
+                return;
+                
+            case "profile":
+                return;
+        }
+    }
+
+    
 
     _getFeedDownloadButton(post) {
         let innerSpan = document.createElement('span');
@@ -69,8 +104,6 @@ class InstaPicloader {
         button.style.minHeight = '40px';
         
         button.appendChild(innerSpan);
-
-        let spanWrapper = document.createElement('span');
 
         button.addEventListener('click', () => this._downloadImg(post));
         return button
