@@ -1,14 +1,15 @@
-browser.runtime.onMessage.addListener(downloadListener)
+browser.runtime.onMessage.addListener(downloadPic)
 
-function downloadListener(message) {
-    downloadPic(message.url, message.filename, message.metadata);
-}
+/*
+TODO: 
+insert metadata in image,
+put proper filename extension.
+ */
+function downloadPic(metadata) {
+    let filename = `${metadata.profileName}_${metadata.time}.jpg`;
 
-
-// TODO: insert metadata in image
-function downloadPic(url_source, filename, metadata) {
     browser.downloads.download({
-        url: url_source,
-        filename: `${filename}.jpg`
+        url: metadata.imgUrl,
+        filename: filename,
     })
 }
