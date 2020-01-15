@@ -66,7 +66,7 @@ class InstaPicloader {
         if (post.tagName != "ARTICLE" || this._hasDownloadButton(post))
             return;
 
-        this._getButtonContainer(post).appendChild(this._getFeedDownloadButton(post));
+        this._getButtonContainer(post).appendChild(this._getDownloadButton(post));
     }
 
     /* 
@@ -160,8 +160,12 @@ class InstaPicloader {
         }
     }
         
+    /* 
+    Returns button for downloading
 
-    _getFeedDownloadButton(post) {
+    TODO: fix button style, background image
+     */
+    _getDownloadButton(post) {
         let innerSpan = document.createElement('span');
         innerSpan.style.backgroundImage = 'url(img/download-icon.png)';
         innerSpan.setAttribute('aria-label', 'Download image');
@@ -175,8 +179,6 @@ class InstaPicloader {
         button.addEventListener('click', () => this._downloadImg(post));
         return button
     }
-
-    
 
     //#endregion
 }
@@ -259,19 +261,40 @@ class InstaObserver {
      */
     async _getTargetNode() {
         try {
+            let targetNode;
             switch (this._getPathType()) {
+                
+                // narrow screen => main > section has 2 children
+                // wide screen   => main > section has 3 children
                 case "feed":
-                    return document.querySelector("div.cGcGK > div > div");
+                    let mainSection = document.querySelector('main > section');
+                    
+                    if (mainSection.children.length == 2)
+                        targetNode = mainSection.children[1].querySelector('div > div > div')
+                    
+                    else if (mainSection.children.length == 3)
+                        targetNode = mainSection.querySelector('div > div > div')
+                        //targetNode = document.querySelector("div.cGcGK > div > div");
+
+                    break;
     
                 case "profile":
-                    return document.querySelectorAll("article.ySN3v")[1].querySelector("div > div");
+                    targetNode = document.querySelectorAll("article.ySN3v")[1].querySelector("div > div");
+                    break;
     
                 case "profile post":
-                    return document.querySelector('.PdwC2');
+                    targetNode = document.querySelector('.PdwC2');
+                    break;
 
                 case "stories":
-                    return document.querySelector(".yS4wN");
+                    targetNode = document.querySelector(".yS4wN");
+                    break;
             }
+
+            if (!targetNode)
+                throw Error('target node is null');
+
+            return targetNode;
         } 
         catch { 
             let w = await wait();
