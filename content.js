@@ -28,7 +28,8 @@ class InstaPicloader {
     _newPostCallback(post) {
         switch(this._pathType){
             case "feed":
-                this._processFeedPost(post); 
+            case "profile post":
+                this._processFeedOrProfilePost(post); 
                 break;
 
             case "stories":
@@ -61,7 +62,7 @@ class InstaPicloader {
 
     If ok, gets button container and adds download button. 
      */
-    _processFeedPost(post) {
+    _processFeedOrProfilePost(post) {
         // The post should be an article
         if (post.tagName != "ARTICLE" || this._hasDownloadButton(post))
             return;
@@ -77,6 +78,7 @@ class InstaPicloader {
     _getButtonContainer(post) {
         switch(this._pathType){
             case "feed":
+            case "profile post":
                 return post.querySelector("div.eo2As > section > span.wmtNn");
 
             case "stories":
@@ -95,6 +97,7 @@ class InstaPicloader {
     _hasDownloadButton(post) {
         switch(this._pathType){
             case "feed":
+            case "profile post":
                 return this._getButtonContainer(post).children.length > 1;
 
             case "stories":
@@ -244,8 +247,6 @@ class InstaObserver {
     Returns promise that resolves with posts-container node.
 
     If there's no target node, waits 300 ms and tries again.
-
-    TODO: "profile post"
      */
     async _getTargetNode() {
         try {
@@ -257,7 +258,7 @@ class InstaObserver {
                     return document.querySelectorAll("article.ySN3v")[1].querySelector("div > div");
     
                 case "profile post":
-                        return;
+                    return document.querySelector('.PdwC2');
 
                 case "stories":
                     return document.querySelector(".yS4wN");
@@ -273,8 +274,6 @@ class InstaObserver {
     /* 
     Current path type.
     Returns "feed" or "stories" or "profile".
-
-    TODO: "profile post"
      */
     _getPathType() {
         let path = window.location.pathname.slice(1);
@@ -290,6 +289,9 @@ class InstaObserver {
                 path == 'session/login_activity/' || 
                 path == 'emails/emails_sent/'
             ) return "settings";
+
+        else if (path.startsWith('p/'))
+            return "profile post";
 
         else 
             return "profile";
