@@ -22,8 +22,6 @@ class InstaPicloader {
 
     /* 
     Calls proper process method for the post.
-
-    TODO: "profile post"
      */
     _newPostCallback(post) {
         switch(this._pathType){
@@ -53,6 +51,7 @@ class InstaPicloader {
         browser.runtime.sendMessage(metadata);
     }
 
+
     //#region  post processing
 
     /* 
@@ -73,7 +72,7 @@ class InstaPicloader {
     /* 
     Returns button container for this _pathType
 
-    TODO: "stories" and "profile" cases.
+    TODO: and "profile" cases.
      */
     _getButtonContainer(post) {
         switch(this._pathType){
@@ -82,7 +81,7 @@ class InstaPicloader {
                 return post.querySelector("div.eo2As > section > span.wmtNn");
 
             case "stories":
-                return;
+                return document.querySelector('header > div').children[1];
                 
             case "profile":
                 return;
@@ -92,16 +91,14 @@ class InstaPicloader {
     /* 
     Returns true if post has download button
 
-    TODO: "stories" and "profile" cases.
+    TODO: "profile" cases.
      */
     _hasDownloadButton(post) {
         switch(this._pathType){
             case "feed":
             case "profile post":
-                return this._getButtonContainer(post).children.length > 1;
-
             case "stories":
-                return;
+                return this._getButtonContainer(post).children.length > 1;
                 
             case "profile":
                 return;
@@ -115,7 +112,7 @@ class InstaPicloader {
     3. Time of the post,
     4. Link to profile.
 
-    TODO: make it work with "stories" and "profile" and "profile post"
+    TODO: make it work with and "profile"
      */
     _getMetadata(post) {
         switch(this._pathType){
@@ -124,16 +121,28 @@ class InstaPicloader {
             case "profile post":
                 let time = post.querySelector('time');            
                 let img = post.querySelectorAll('img')[1];
+                let headerlink = post.querySelector('header a');
 
                 return {
                     imgUrl:         img.currentSrc,
-                    profileName:    post.querySelector('header a').title,
+                    profileName:    headerlink.title,
+                    profileLink:    headerlink.href,
                     time:           formatTime(time),
-                    profileLink:    time.parentElement.href,
+                    postLink:       time.parentElement.href,
                 };
 
             case "stories":
-                return;
+                let time = post.querySelector('time');   
+                let img = post.querySelectorAll('img')[1];
+                let headerlink = post.post.querySelectorAll('header a')[1];
+
+                return {
+                    imgUrl:         img.currentSrc,
+                    profileName:    headerlink.title,
+                    profileLink:    headerlink.href,
+                    time:           formatTime(time),
+                    postLink:       window.location.href,
+                };
                 
             case "profile":
                 return;
