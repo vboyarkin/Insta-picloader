@@ -69,6 +69,13 @@ class InstaPicloader {
         this._getButtonContainer(post).appendChild(this._getDownloadButton(post));
     }
 
+    _processStorie(post) {
+        if (this._hasDownloadButton(post))
+            return;
+            
+        this._getButtonContainer(post).appendChild(this._getDownloadButton(post));
+    }
+
     /* 
     Returns button container for this _pathType
 
@@ -115,13 +122,16 @@ class InstaPicloader {
     TODO: make it work with and "profile"
      */
     _getMetadata(post) {
-        switch(this._pathType){
+        let time;
+        let img;
+        let headerlink;
 
+        switch(this._pathType){
             case "feed":     
             case "profile post":
-                let time = post.querySelector('time');            
-                let img = post.querySelectorAll('img')[1];
-                let headerlink = post.querySelector('header a');
+                time = post.querySelector('time');            
+                img = post.querySelectorAll('img')[1];
+                headerlink = post.querySelector('header a');
 
                 return {
                     imgUrl:         img.currentSrc,
@@ -132,9 +142,9 @@ class InstaPicloader {
                 };
 
             case "stories":
-                let time = post.querySelector('time');   
-                let img = post.querySelectorAll('img')[1];
-                let headerlink = post.post.querySelectorAll('header a')[1];
+                time = post.querySelector('time');   
+                img = post.querySelectorAll('img')[1];
+                headerlink = post.querySelectorAll('header a')[1];
 
                 return {
                     imgUrl:         img.currentSrc,
