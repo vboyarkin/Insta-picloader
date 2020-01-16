@@ -26,5 +26,8 @@
 
 	"permissions": [
 		"downloads"
-	]  
+	],
+	"web_accessible_resources": [
+		"img/download-icon.png"
+	]
 }
