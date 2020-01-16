@@ -1,7 +1,7 @@
 'use strict'
 
 /* 
-TODO: Adds buttons to posts
+TODO: "profile" posts
  */
 class InstaPicloader {
     _instaObserver = new InstaObserver(this._targetNodeCallback.bind(this), this._newPostCallback.bind(this));
@@ -49,6 +49,17 @@ class InstaPicloader {
         console.log(metadata);
 
         browser.runtime.sendMessage(metadata);
+    }
+
+    /* 
+    Returns true if body's background-color is dark
+     */
+    _isThemeDark() {
+        let rgb = getComputedStyle(document.body).backgroundColor.substring(4,14);
+        
+        let sumOfColors = rgb.split(', ').reduce((a, b) => +a + +b);
+
+        return sumOfColors <= 65 * 3;
     }
 
 
@@ -162,15 +173,15 @@ class InstaPicloader {
                 return;
         }
 
-                return {
-                    imgUrl:         img.currentSrc,
-                    profileName:    headerlink.title,
-                    profileLink:    headerlink.href,
-                    time:           formatTime(time),
+        return {
+            imgUrl:         img.currentSrc,
+            profileName:    headerlink.title,
+            profileLink:    headerlink.href,
+            time:           formatTime(time),
             postLink:       postLink,
             alt:            img.alt,
-                };
-                
+        };
+
         /* Local function.
         Extracts time from <time> and make it valid for filename.
          */
@@ -190,17 +201,40 @@ class InstaPicloader {
      */
     _getDownloadButton(post) {
         let innerSpan = document.createElement('span');
-        innerSpan.style.backgroundImage = 'url(img/download-icon.png)';
         innerSpan.setAttribute('aria-label', 'Download image');
 
-        let button = document.createElement('button');
-        button.style.minWidth = '40px';
-        button.style.minHeight = '40px';
-        
-        button.appendChild(innerSpan);
+        innerSpan.style.cssText += `
+            background-image:       url(${browser.runtime.getURL('img/download-icon.png')});
+            background-size:        24px 24px;
+            background-repeat:      no-repeat;
+            background-position:    center center;
+            display:                inline-block;
+            cursor:                 pointer;
+        `;
 
+        let button = document.createElement('button');        
+        button.appendChild(innerSpan);
         button.addEventListener('click', () => this._downloadImg(post));
-        return button
+
+        // Makes button white if theme's dark
+        if (this._isThemeDark())
+            button.style.cssText += `
+                opacity:    0.87;
+                filter:     invert(100%);
+            `;
+
+        for (const elem of [button, innerSpan]) {
+            elem.style.cssText += `
+                background-color:   transparent;
+                border:             0;
+                min-width:          40px;
+                min-height:         40px;
+                padding:            0;
+                margin:             0;
+            `;
+        }
+
+        return button;
     }
 
     //#endregion
