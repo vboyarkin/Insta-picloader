@@ -6,6 +6,7 @@ TODO: "profile" posts
 class InstaPicloader {
     _instaObserver = new InstaObserver(this._targetNodeCallback.bind(this), this._newPostCallback.bind(this));
     _pathType;
+    _downloadButtonClass = 'insta-picloader-download-button';
 
     /* 
     Calls when document's load or after following links.
@@ -110,7 +111,8 @@ class InstaPicloader {
         switch(this._pathType){
             case "feed":
             case "profile post":
-                return post.querySelector("div.eo2As > section > span.wmtNn");
+                //return post.querySelector("div.eo2As > section > span.wmtNn");
+                return post.querySelector('div > section');
 
             case "stories":
                 return document.querySelector('header > div').children[1];
@@ -127,14 +129,21 @@ class InstaPicloader {
      */
     _hasDownloadButton(post) {
         switch(this._pathType){
+
             case "feed":
             case "profile post":
             case "stories":
-                return this._getButtonContainer(post).children.length > 1;
+                for (const elem of this._getButtonContainer(post).children) {
+                    if (elem.classList.contains(this._downloadButtonClass))
+                        return true;
+                }
+                break;
                 
             case "profile":
-                return;
+                break;
         }
+
+        return false;
     }
 
     /* 
@@ -196,8 +205,6 @@ class InstaPicloader {
         
     /* 
     Returns button for downloading
-
-    TODO: fix button style, background image
      */
     _getDownloadButton(post) {
         let innerSpan = document.createElement('span');
@@ -214,6 +221,9 @@ class InstaPicloader {
 
         let button = document.createElement('button');        
         button.appendChild(innerSpan);
+
+        // to check if there is a download button in post
+        button.classList.add(this._downloadButtonClass);
         button.addEventListener('click', () => this._downloadImg(post));
 
         // Makes button white if theme's dark
