@@ -35,7 +35,7 @@ class InstaPicloader {
                 break;
                 
             case "profile":
-                this._processProfilePost(post);
+                this._processProfileContainer(post);
                 break;
         }
     }
@@ -69,11 +69,25 @@ class InstaPicloader {
         this._getButtonContainer(post).appendChild(this._getDownloadButton(post));
     }
 
+    /* 
+    Checks if the storie already has download button
+    and adds download button.
+     */
     _processStorie(post) {
         if (this._hasDownloadButton(post))
             return;
             
         this._getButtonContainer(post).appendChild(this._getDownloadButton(post));
+    }
+
+    /* 
+    TODO: Processes every post in container
+     */
+    _processProfileContainer(container) {
+        // contaner has 3 posts
+        /*for (const post of container) {
+            
+        }*/
     }
 
     /* 
@@ -125,39 +139,38 @@ class InstaPicloader {
         let time;
         let img;
         let headerlink;
+        let postLink;
 
         switch(this._pathType){
             case "feed":     
             case "profile post":
-                time = post.querySelector('time');            
-                img = post.querySelectorAll('img')[1];
-                headerlink = post.querySelector('header a');
+                time        = post.querySelector('time');            
+                img         = post.querySelectorAll('img')[1];
+                headerlink  = post.querySelector('header a');
+                postLink    = time.parentElement.href;
 
-                return {
-                    imgUrl:         img.currentSrc,
-                    profileName:    headerlink.title,
-                    profileLink:    headerlink.href,
-                    time:           formatTime(time),
-                    postLink:       time.parentElement.href,
-                };
+                break;
 
             case "stories":
-                time = post.querySelector('time');   
-                img = post.querySelectorAll('img')[1];
-                headerlink = post.querySelectorAll('header a')[1];
-
-                return {
-                    imgUrl:         img.currentSrc,
-                    profileName:    headerlink.title,
-                    profileLink:    headerlink.href,
-                    time:           formatTime(time),
-                    postLink:       window.location.href,
-                };
+                time        = post.querySelector('time');   
+                img         = post.querySelectorAll('img')[1];
+                headerlink  = post.querySelectorAll('header a')[1];
+                postLink    = window.location.href;
+                break;
                 
             case "profile":
                 return;
         }
 
+                return {
+                    imgUrl:         img.currentSrc,
+                    profileName:    headerlink.title,
+                    profileLink:    headerlink.href,
+                    time:           formatTime(time),
+            postLink:       postLink,
+            alt:            img.alt,
+                };
+                
         /* Local function.
         Extracts time from <time> and make it valid for filename.
          */
