@@ -53,16 +53,6 @@ class InstaPicloader {
         }
     }
 
-    /* 
-    Gets all data, 
-    sends message to background-script.js
-     */
-    _downloadImg(post) {
-        let metadata = this._getMetadata(post);
-        console.log(metadata);
-
-        browser.runtime.sendMessage(metadata);
-    }
 
     /* 
     Returns true if body's background-color is dark
@@ -236,7 +226,7 @@ class InstaPicloader {
 
         // to check if there is a download button in post
         button.classList.add(this._downloadButtonClass);
-        button.addEventListener('click', () => this._downloadImg(post));
+        button.addEventListener('click', () => this._instaObserver.downloadImg(this._getMetadata(post)));
 
         // Makes button white if theme's dark
         if (this._isThemeDark())
@@ -270,6 +260,7 @@ calls _targetNodeCallback() on following link
 class InstaObserver {
     _mutationObserver = new MutationObserver(this._observerCallback.bind(this));
     _urlChangeObserver = new UrlChangeObserver(this._urlObserverCallback.bind(this));
+    _bGConnector = new BGConnector();
     _targetNodeCallback;
     _newPostCallback;
 
@@ -310,6 +301,17 @@ class InstaObserver {
     restart() {
         this.disconnect();
         this.observe();
+    }
+    
+    /* 
+    Gets all data, 
+    sends message to background-script.js
+     */
+    downloadImg(metadata) {
+        this._bGConnector.postMessage({
+            type: "download",
+            metadata,
+        });
     }
 
     /* 
