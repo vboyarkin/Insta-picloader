@@ -8,6 +8,18 @@ class InstaPicloader {
     _pathType;
     _downloadButtonClass = 'insta-picloader-download-button';
 
+    constructor() {
+        this.observe()
+    }
+
+    observe() {
+        this._instaObserver.observe();
+    }
+    
+    disconnect() {
+        this._instaObserver.disconnect();
+    }
+
     /* 
     Calls when document's load or after following links.
 
@@ -166,7 +178,7 @@ class InstaPicloader {
             case "profile post":
                 time        = post.querySelector('time');            
                 img         = post.querySelectorAll('img')[1];
-                headerlink  = post.querySelector('header a');
+                headerlink  = post.querySelectorAll('header a')[1];
                 postLink    = time.parentElement.href;
 
                 break;
@@ -271,8 +283,6 @@ class InstaObserver {
     constructor(targetNodeCallback, newPostCallback) {
         this._targetNodeCallback = targetNodeCallback;
         this._newPostCallback = newPostCallback;
-
-        this.observe();
     }
 
     /* 
@@ -435,6 +445,30 @@ class UrlChangeObserver {
         }
     }
 }
+
+class BGConnector {
+    port;
+
+    constructor() {
+        this._connectToBGScript();
+    }
+
+    _connectToBGScript() {
+        this.port = browser.runtime.connect();
+        this.port.onMessage.addListener(this._onMessage);
+        //postMessage();
+    }
+
+    /* 
+    TODO: stop/start url observer */
+    _onMessage() {
+
+    }
+
+    postMessage (message) {
+        this.port.postMessage(message);
+    }
+} 
 
 function wait() {
     return new Promise((resolve) => {
