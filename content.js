@@ -260,7 +260,7 @@ calls _targetNodeCallback() on following link
 class InstaObserver {
     _mutationObserver = new MutationObserver(this._observerCallback.bind(this));
     _urlChangeObserver = new UrlChangeObserver(this._urlObserverCallback.bind(this));
-    _bGConnector = new BGConnector();
+    _bGConnector = new BGConnector(this._urlChangeObserver);
     _targetNodeCallback;
     _newPostCallback;
 
@@ -327,7 +327,8 @@ class InstaObserver {
 
     /* 
     UrlChangeObserver callback.
-    Restarts observing.
+    
+    Calls on URL change.
      */
     _urlObserverCallback() {
         this.restart();
@@ -448,23 +449,29 @@ class UrlChangeObserver {
     }
 }
 
+/* 
+Connection with background-script.js.
+Starts/stops observing url.
+ */
 class BGConnector {
+    _urlChangeObserver;
     port;
 
-    constructor() {
+    constructor(urlChangeObserver) {
+        this._urlChangeObserver = urlChangeObserver;
         this._connectToBGScript();
     }
 
     _connectToBGScript() {
         this.port = browser.runtime.connect();
         this.port.onMessage.addListener(this._onMessage);
-        //postMessage();
     }
 
     /* 
-    TODO: stop/start url observer */
-    _onMessage() {
-
+    TODO: stop/start url observer 
+     */
+    _onMessage(message) {
+        console.log(message)
     }
 
     postMessage (message) {
