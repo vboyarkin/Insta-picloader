@@ -1,26 +1,26 @@
 //browser.runtime.onMessage.addListener(downloadPic)
+ 
+ 
+ 
+ * /** // this should activate/deactivate url observer
+ * function messageListener(message, sender) {
+       * switch (message.type) {
+             * case "download":
+                   * downloadPic(message.metadata);
+                   * break;
+ 
+             * case "tabId":
+                   * instagramTabs.push(tabId);
+       * }
+ 
+ 
+       * console.log("Tab " + activeInfo.tabId + " was activated");
+ * } */
 
-
-
-/* // this should activate/deactivate url observer
-function messageListener(message, sender) {
-    switch (message.type) {
-        case "download":
-            downloadPic(message.metadata);
-            break;
-
-        case "tabId":
-            instagramTabs.push(tabId);
-    }
-
-
-    console.log("Tab " + activeInfo.tabId + " was activated");
-} */
-
-/*
-TODO: 
-insert metadata in image,
-put proper filename extension.
+/**
+ * TODO: 
+ * insert metadata in image,
+ * put proper filename extension.
  */
 function downloadPic(metadata) {
     let filename = `${metadata.profileName} ${metadata.time}.jpg`;
@@ -34,22 +34,22 @@ function downloadPic(metadata) {
 
 
 
-/* 
-TODO: remove tab & port from tabPorts on tab close
+/** 
+ * TODO: remove tab & port from tabPorts on tab close
  */
 class CSConnector {
-    /* 
-    Map contains pairs tab - port
-     */
+    /** 
+       * Map contains pairs tab - port
+       */
     tabPortsMap = new Map();
 
     constructor() {
         browser.runtime.onConnect.addListener(this.onConnect.bind(this));
     }
 
-    /* 
-    Called on opening new instagram tab
-     */
+    /** 
+       * Called on opening new instagram tab
+       */
     onConnect(port) {
         let tabId = port.sender.tab.id;
         this.tabPortsMap.set(tabId, port);
@@ -68,12 +68,12 @@ class CSConnector {
         }
     }
     
-    /* 
-    Called on active tab change.
-
-    If tab is instagram, observe it.
-    If instagram tab is inactive, stop observing.
-     */
+    /** 
+       * Called on active tab change.
+ 
+       * If tab is instagram, observe it.
+       * If instagram tab is inactive, stop observing.
+       */
     _onTabActivated(activeInfo) {
         let activeTabId = activeInfo.tabId;
 
