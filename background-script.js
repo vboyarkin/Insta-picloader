@@ -8,7 +8,7 @@ function downloadPic(metadata) {
 
     browser.downloads.download({
         url: metadata.imgUrl,
-        filename: filename,
+        filename,
     });
 }
 

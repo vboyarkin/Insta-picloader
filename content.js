@@ -1,7 +1,5 @@
 "use strict";
-/**
- * TODO: "profile" posts
- */
+
 class InstaPicloader {
     _instaObserver = new InstaObserver(
         this._targetNodeCallback.bind(this),
@@ -157,34 +155,20 @@ class InstaPicloader {
      * 2. Profile name,
      * 3. Time of the post,
      * 4. Link to profile.
-     *
-     * TODO: make it work with and "profile"
+     * @param {Object}              meta
+     * @param {HTMLLinkElement}     post
+     * @param {HTMLTimeElement}     meta.time
+     * @param {HTMLImageElement}    meta.img
+     * @param {HTMLLinkElement}     meta.headerlink
+     * @param {string}              meta.postLink
      */
-    _getMetadata(post) {
-        let time;
-        let img;
-        let headerlink;
-        let postLink;
-
-        switch (this._pathType) {
-            case "feed":
-            case "profile post":
-                time = post.querySelector("time");
-                img = post.querySelectorAll("img")[1];
-                headerlink = post.querySelectorAll("header a")[1];
-                postLink = time.parentElement.href;
-
-                break;
-
-            case "stories":
-                time = post.querySelector("time");
-                img = post.querySelectorAll("img")[1];
-                headerlink = post.querySelectorAll("header a")[1];
-                postLink = window.location.href;
-                break;
-
-            case "profile":
-                return;
+    _getMetadata({ post, time, img, headerlink, postLink }) {
+        if (!time) time = post.querySelector("time");
+        if (!img) img = post.querySelectorAll("img")[1];
+        if (!headerlink) {
+            let headerlinks = post.querySelectorAll("header a");
+            //find link with title
+            headerlink = [].filter.call(headerlinks, a => a.title)[0];
         }
 
         return {
@@ -321,7 +305,7 @@ class InstaObserver {
      * sends message to background-script.js
      */
     downloadImg(metadata) {
-        this._bGConnector.postMessage({
+        this._bGConnector.postMessage.call(this._bGConnector, {
             type: "download",
             metadata,
         });
@@ -400,7 +384,7 @@ class InstaObserver {
 
     /**
      * Current path type.
-     * Returns "feed" or "stories" or "profile".
+     * @returns {"feed" | "stories" | "profile"}
      */
     _getPathType() {
         let path = window.location.pathname.slice(1);
