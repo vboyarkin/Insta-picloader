@@ -52,18 +52,16 @@ class InstaPicloader {
         }
     }
 
+class Post {
+    _downloadHandler;
+    _downloadButtonClass = "insta-picloader-download-button";
+
     /**
-     * Returns true if body's background-color is dark
+     * Adds downloadHandler to download buttons
+     * @param {function} downloadHandler
      */
-    _isThemeDark() {
-        let rgb = getComputedStyle(document.body).backgroundColor.substring(
-            4,
-            14
-        );
-
-        let sumOfColors = rgb.split(", ").reduce((a, b) => +a + +b);
-
-        return sumOfColors <= 65 * 3;
+    constructor(downloadHandler) {
+        this._downloadHandler = downloadHandler;
     }
 
     //#region  post processing
@@ -85,10 +83,11 @@ class InstaPicloader {
     }
 
     /**
-     * Checks if the storie already has download button
-     * and adds download button.
+     * Checks if the post already has download button (why this happens?).
+     *
+     * If ok, gets button container and adds download button.
      */
-    _processStorie(post) {
+    processPost(post) {
         if (this._hasDownloadButton(post)) return;
 
         this._getButtonContainer(post).appendChild(
@@ -97,53 +96,13 @@ class InstaPicloader {
     }
 
     /**
-     * TODO: Processes every post in container
-     */
-    _processProfileContainer(container) {
-        // contaner has 3 posts
-        /**for (const post of container) {
-                   
-             * }*/
-    }
-
-    /**
-     * Returns button container for this _pathType
-     *
-     * TODO: and "profile" cases.
-     */
-    _getButtonContainer(post) {
-        switch (this._pathType) {
-            case "feed":
-            case "profile post":
-                //return post.querySelector("div.eo2As > section > span.wmtNn");
-                return post.querySelector("div > section");
-
-            case "stories":
-                return document.querySelector("header > div").children[1];
-
-            case "profile":
-                return;
-        }
-    }
-
-    /**
      * Returns true if post has download button
      *
      * TODO: "profile" cases.
      */
     _hasDownloadButton(post) {
-        switch (this._pathType) {
-            case "feed":
-            case "profile post":
-            case "stories":
-                for (const elem of this._getButtonContainer(post).children) {
-                    if (elem.classList.contains(this._downloadButtonClass))
-                        return true;
-                }
-                break;
-
-            case "profile":
-                break;
+        for (const elem of this._getButtonContainer(post).children) {
+            if (elem.classList.contains(this._downloadButtonClass)) return true;
         }
 
         return false;
@@ -217,7 +176,7 @@ class InstaPicloader {
         // to check if there is a download button in post
         button.classList.add(this._downloadButtonClass);
         button.addEventListener("click", () =>
-            this._instaObserver.downloadImg(this._getMetadata(post))
+            this._downloadHandler(this._getMetadata(post))
         );
 
         // Makes button white if theme's dark
@@ -241,7 +200,70 @@ class InstaPicloader {
         return button;
     }
 
-    //#endregion
+    /**
+     * Returns true if body's background-color is dark
+     */
+    _isThemeDark() {
+        let rgb = getComputedStyle(document.body).backgroundColor.substring(
+            4,
+            14
+        );
+
+        let sumOfColors = rgb.split(", ").reduce((a, b) => +a + +b);
+
+        return sumOfColors <= 65 * 3;
+    }
+}
+
+class FeedOrProfilePost extends Post {
+    constructor(downloadHandler) {
+        super(downloadHandler);
+    }
+
+    /**
+     * Checks if the post is an article and calls super's process post method
+     * @param {HTMLElement} post article
+     */
+    processPost(post) {
+        // The post should be an article
+        if (post.tagName != "ARTICLE") return;
+
+        super.processPost(post);
+    }
+
+    _getMetadata(post) {
+        let time = post.querySelector("time");
+
+        return super._getMetadata({
+            post,
+            postLink: time.parentElement.href,
+        });
+    }
+
+    /**
+     * Returns button container
+     */
+    _getButtonContainer(post) {
+        return post.querySelector("div > section");
+    }
+}
+
+class StoriePost extends Post {
+    constructor() {}
+
+    /**
+     * Returns button container
+     */
+    _getButtonContainer(post) {
+        return document.querySelector("header > div").children[1];
+    }
+
+    _getMetadata(post) {
+        return super._getMetadata({
+            post,
+            postLink: window.location.href,
+        });
+    }
 }
 
 /**
