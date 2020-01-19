@@ -5,8 +5,7 @@ class InstaPicloader {
         this._targetNodeCallback.bind(this),
         this._newPostCallback.bind(this)
     );
-    _pathType;
-    _downloadButtonClass = "insta-picloader-download-button";
+    _postProcesser;
 
     constructor() {
         this.observe();
@@ -25,7 +24,10 @@ class InstaPicloader {
      * Calls _newPostCallback(post) on every post.
      */
     _targetNodeCallback(targetNode, pathType) {
-        this._pathType = pathType;
+        this._postProcesser = Post.getPostProcessor(
+            pathType,
+            this._instaObserver.downloadImg.bind(this._instaObserver)
+        );
 
         for (let post of targetNode.children) {
             this._newPostCallback(post);
@@ -36,21 +38,9 @@ class InstaPicloader {
      * Calls proper process method for the post.
      */
     _newPostCallback(post) {
-        switch (this._pathType) {
-            case "feed":
-            case "profile post":
-                this._processFeedOrProfilePost(post);
-                break;
-
-            case "stories":
-                this._processStorie(post);
-                break;
-
-            case "profile":
-                this._processProfileContainer(post);
-                break;
-        }
+        this._postProcesser.processPost.call(this._postProcesser, post);
     }
+}
 
 class Post {
     _downloadHandler;
@@ -64,22 +54,22 @@ class Post {
         this._downloadHandler = downloadHandler;
     }
 
-    //#region  post processing
-
-    /** 
-     * Checks if the post:
-     * 1. is an article,
-     * 2. already has download button (why this happens?).
- 
-     * If ok, gets button container and adds download button. 
-    */
-    _processFeedOrProfilePost(post) {
-        // The post should be an article
-        if (post.tagName != "ARTICLE" || this._hasDownloadButton(post)) return;
-
-        this._getButtonContainer(post).appendChild(
-            this._getDownloadButton(post)
-        );
+    /**
+     * Get proper post processor for pathType
+     * @param {('feed'|'profile post'|'stories'|'profile')} pathType
+     * @param {function} downloadHandler
+     * @returns {FeedOrProfilePost|StoriePost} post processor
+     */
+    static getPostProcessor(pathType, downloadHandler) {
+        switch (pathType) {
+            case "feed":
+            case "profile post":
+                return new FeedOrProfilePost(downloadHandler);
+            case "stories":
+                return new StoriePost(downloadHandler);
+            case "profile":
+                return;
+        }
     }
 
     /**
