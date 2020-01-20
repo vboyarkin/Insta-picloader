@@ -124,14 +124,14 @@ class Post {
         
         // find video url if there's any
         if (!videoUrl) {
-            let videoSrcs = post.querySelector("video source");
+            let videoSrcs = video.querySelectorAll("source");
 
             if (videoSrcs) {
                 videoSrcs = [].map.call(
                     videoSrcs,
                     sourceElem => sourceElem.src
                 );
-                videoSrcs = [].filter.call(videoSrcs, src => !src);
+                videoSrcs = [].filter.call(videoSrcs, src => src);
 
                 videoUrl = videoSrcs[0];
             }

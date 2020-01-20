@@ -4,10 +4,14 @@
  * put proper filename extension.
  */
 function downloadPic(metadata) {
-    let filename = `${metadata.profileName} ${metadata.time}.jpg`;
+    let fileUrl = metadata.videoUrl || metadata.imgUrl;
+
+    let extension = fileUrl.match(/\....\?/)[0].substr(1, 3);
+
+    let filename = `${metadata.profileName} ${metadata.time}.${extension}`;
 
     browser.downloads.download({
-        url: metadata.imgUrl,
+        url: fileUrl,
         filename,
     });
 }
