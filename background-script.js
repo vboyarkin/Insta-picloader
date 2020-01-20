@@ -16,7 +16,7 @@ function downloadPic(metadata) {
 }
 
 /**
- * TODO: remove tab & port from tabPorts on tab close
+ * Handles connection with instagram tabs.
  */
 class CSConnector {
     /**
@@ -29,6 +29,7 @@ class CSConnector {
      */
     constructor() {
         browser.runtime.onConnect.addListener(this.onConnect.bind(this));
+        browser.tabs.onRemoved.addListener(this.onRemoved.bind(this));
     }
 
     /**
@@ -44,7 +45,16 @@ class CSConnector {
     }
 
     /**
-     * 
+     * Called on closing any tab.
+     * Removes closed connections.
+     * @param {number} tabId Id of closed tab
+     */
+    onRemoved(tabId) {
+        this.tabPortsMap.delete(tabId);
+    }
+
+    /**
+     *
      * @param {Object}      message
      * @param {"download"}  message.type
      * @param {Object}      message.metadata file url and meta
@@ -59,7 +69,7 @@ class CSConnector {
 
     /**
      * Called on active tab change.
-     * 
+     *
      * If tab is instagram, observe it.
      * If instagram tab is inactive, stop observing.
      */

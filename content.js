@@ -121,7 +121,6 @@ class Post {
             headerlink = [].filter.call(headerlinks, a => a.title)[0];
         }
 
-        
         // find video url if there's any
         if (video && !videoUrl) {
             let videoSrcs = video.querySelectorAll("source");
@@ -493,7 +492,7 @@ class BGConnector {
     }
 
     /**
-     * Listens to commands from background-script 
+     * Listens to commands from background-script
      */
     _onPortMessage(message) {
         if (message.observerAction) this._observer[message.observerAction]();
