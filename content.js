@@ -111,21 +111,39 @@ class Post {
      * @param {HTMLLinkElement}     meta.headerlink
      * @param {string}              meta.postLink
      */
-    _getMetadata({ post, time, img, headerlink, postLink }) {
+    _getMetadata({ post, time, img, video, videoUrl, headerlink, postLink }) {
         if (!time) time = post.querySelector("time");
         if (!img) img = post.querySelectorAll("img")[1];
+        if (!video) video = post.querySelector("video");
         if (!headerlink) {
             let headerlinks = post.querySelectorAll("header a");
             //find link with title
             headerlink = [].filter.call(headerlinks, a => a.title)[0];
         }
 
+        
+        // find video url if there's any
+        if (!videoUrl) {
+            let videoSrcs = post.querySelector("video source");
+
+            if (videoSrcs) {
+                videoSrcs = [].map.call(
+                    videoSrcs,
+                    sourceElem => sourceElem.src
+                );
+                videoSrcs = [].filter.call(videoSrcs, src => !src);
+
+                videoUrl = videoSrcs[0];
+            }
+        }
+
         return {
             imgUrl: img.currentSrc,
+            videoUrl,
             profileName: headerlink.title,
             profileLink: headerlink.href,
             time: formatTime(time),
-            postLink: postLink,
+            postLink,
             alt: img.alt,
         };
 
@@ -239,7 +257,9 @@ class FeedOrProfilePost extends Post {
 }
 
 class StoriePost extends Post {
-    constructor() {}
+    constructor(downloadHandler) {
+        super(downloadHandler);
+    }
 
     /**
      * Returns button container
