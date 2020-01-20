@@ -1,7 +1,6 @@
 /**
  * TODO:
- * insert metadata in image,
- * put proper filename extension.
+ * insert metadata in image
  */
 function downloadPic(metadata) {
     let fileUrl = metadata.videoUrl || metadata.imgUrl;
@@ -25,6 +24,9 @@ class CSConnector {
      */
     tabPortsMap = new Map();
 
+    /**
+     * Make onConnect listen to new content script
+     */
     constructor() {
         browser.runtime.onConnect.addListener(this.onConnect.bind(this));
     }
@@ -36,12 +38,18 @@ class CSConnector {
         let tabId = port.sender.tab.id;
         this.tabPortsMap.set(tabId, port);
 
-        port.onMessage.addListener(this._onMessage.bind(this));
+        port.onMessage.addListener(this._onPortMessage.bind(this));
 
         browser.tabs.onActivated.addListener(this._onTabActivated.bind(this));
     }
 
-    _onMessage(message) {
+    /**
+     * 
+     * @param {Object}      message
+     * @param {"download"}  message.type
+     * @param {Object}      message.metadata file url and meta
+     */
+    _onPortMessage(message) {
         switch (message.type) {
             case "download":
                 downloadPic(message.metadata);
@@ -64,11 +72,11 @@ class CSConnector {
 
             if (tab != activeTabId) {
                 port.postMessage({
-                    action: "disconnect",
+                    observerAction: "disconnect",
                 });
             } else
                 port.postMessage({
-                    action: "observe",
+                    observerAction: "observe",
                 });
         }
     }

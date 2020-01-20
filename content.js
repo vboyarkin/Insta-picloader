@@ -123,7 +123,7 @@ class Post {
 
         
         // find video url if there's any
-        if (!videoUrl) {
+        if (video && !videoUrl) {
             let videoSrcs = video.querySelectorAll("source");
 
             if (videoSrcs) {
@@ -489,15 +489,14 @@ class BGConnector {
 
     _connectToBGScript() {
         this.port = browser.runtime.connect();
-        this.port.onMessage.addListener(this._onMessage.bind(this));
+        this.port.onMessage.addListener(this._onPortMessage.bind(this));
     }
 
     /**
-     * TODO: stop/start url observer
+     * Listens to commands from background-script 
      */
-    _onMessage(message) {
-        // if action is provided
-        if (message.action) this._observer[message.action]();
+    _onPortMessage(message) {
+        if (message.observerAction) this._observer[message.observerAction]();
     }
 
     postMessage(message) {
