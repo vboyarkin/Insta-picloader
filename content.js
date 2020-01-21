@@ -1,13 +1,25 @@
+/* eslint-disable default-case */
+/* eslint-disable no-useless-return */
+/* eslint-disable comma-dangle */
+/* eslint-disable arrow-parens */
+/* eslint-disable no-param-reassign */
+/* eslint-disable object-curly-newline */
+/* eslint-disable indent */
+/* eslint-disable no-underscore-dangle */
+/* eslint-disable no-use-before-define */
+/* eslint-disable quotes */
+/* eslint-disable max-classes-per-file */
+/* eslint-disable strict */
+
 "use strict";
 
 class InstaPicloader {
-    _instaObserver = new InstaObserver(
-        this._targetNodeCallback.bind(this),
-        this._newPostCallback.bind(this)
-    );
-    _postProcesser;
-
     constructor() {
+        this._instaObserver = new InstaObserver(
+            this._targetNodeCallback.bind(this),
+            this._newPostCallback.bind(this),
+        );
+
         this.observe();
     }
 
@@ -26,10 +38,10 @@ class InstaPicloader {
     _targetNodeCallback(targetNode, pathType) {
         this._postProcesser = Post.getPostProcessor(
             pathType,
-            this._instaObserver.downloadImg.bind(this._instaObserver)
+            this._instaObserver.downloadImg.bind(this._instaObserver),
         );
 
-        for (let post of targetNode.children) {
+        for (const post of targetNode.children) {
             this._newPostCallback(post);
         }
     }
@@ -43,14 +55,12 @@ class InstaPicloader {
 }
 
 class Post {
-    _downloadHandler;
-    _downloadButtonClass = "insta-picloader-download-button";
-
     /**
      * Adds downloadHandler to download buttons
      * @param {function} downloadHandler
      */
     constructor(downloadHandler) {
+        this._downloadButtonClass = "insta-picloader-download-button";
         this._downloadHandler = downloadHandler;
     }
 
@@ -81,7 +91,7 @@ class Post {
         if (this._hasDownloadButton(post)) return;
 
         this._getButtonContainer(post).appendChild(
-            this._getDownloadButton(post)
+            this._getDownloadButton(post),
         );
     }
 
@@ -116,8 +126,8 @@ class Post {
         if (!img) img = post.querySelectorAll("img")[1];
         if (!video) video = post.querySelector("video");
         if (!headerlink) {
-            let headerlinks = post.querySelectorAll("header a");
-            //find link with title
+            const headerlinks = post.querySelectorAll("header a");
+            // find link with title
             headerlink = [].filter.call(headerlinks, a => a.title)[0];
         }
 
@@ -149,8 +159,8 @@ class Post {
         /** Local function.
          * Extracts time from <time> and make it valid for filename.
          */
-        function formatTime(time) {
-            return time
+        function formatTime(timeElem) {
+            return timeElem
                 .getAttribute("datetime")
                 .substring(0, 19)
                 .replace("T", "_")
@@ -163,7 +173,7 @@ class Post {
      * Returns button for downloading
      */
     _getDownloadButton(post) {
-        let innerSpan = document.createElement("span");
+        const innerSpan = document.createElement("span");
         innerSpan.setAttribute("aria-label", "Download image");
 
         innerSpan.style.cssText += `
@@ -177,7 +187,7 @@ class Post {
             cursor:                 pointer;
         `;
 
-        let button = document.createElement("button");
+        const button = document.createElement("button");
         button.appendChild(innerSpan);
 
         // to check if there is a download button in post
@@ -283,14 +293,6 @@ class StoriePost extends Post {
  * 2. _newPostCallback()    on new post in container
  */
 class InstaObserver {
-    _mutationObserver = new MutationObserver(this._observerCallback.bind(this));
-    _urlChangeObserver = new UrlChangeObserver(
-        this._urlObserverCallback.bind(this)
-    );
-    _bGConnector = new BGConnector(this);
-    _targetNodeCallback;
-    _newPostCallback;
-
     /**
      * targetNodeCallback(targetNode, pathType);
      * Calls when document's load or after following links.
@@ -299,6 +301,12 @@ class InstaObserver {
      * Calls on target node mutation.
      */
     constructor(targetNodeCallback, newPostCallback) {
+        this._mutationObserver = new MutationObserver(this._observerCallback.bind(this));
+        this._urlChangeObserver = new UrlChangeObserver(
+            this._urlObserverCallback.bind(this)
+        );
+        this._bGConnector = new BGConnector(this);
+
         this._targetNodeCallback = targetNodeCallback;
         this._newPostCallback = newPostCallback;
     }
@@ -308,7 +316,7 @@ class InstaObserver {
      */
 
     async observe() {
-        let targetNode = await this._getTargetNode();
+        const targetNode = await this._getTargetNode();
 
         this._targetNodeCallback(targetNode, this._getPathType());
 
@@ -406,7 +414,7 @@ class InstaObserver {
             if (!targetNode) throw Error("target node is null");
 
             return targetNode;
-        } catch {
+        } catch (e){
             let w = await wait();
 
             return this._getTargetNode();
@@ -439,11 +447,8 @@ class InstaObserver {
  * calls callback if href has changed
  */
 class UrlChangeObserver {
-    _timer = null;
-    _callback;
-    _prevUrl;
-
     constructor(callback) {
+        this._timer = null;
         this._callback = callback;
     }
 
@@ -478,8 +483,6 @@ class UrlChangeObserver {
  * on corresponding message from bg-script.
  */
 class BGConnector {
-    _observer;
-    port;
 
     constructor(observer) {
         this._observer = observer;

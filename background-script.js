@@ -1,13 +1,14 @@
+/* eslint-disable no-undef */
 /**
  * TODO:
  * insert metadata in image
  */
 function downloadPic(metadata) {
-    let fileUrl = metadata.videoUrl || metadata.imgUrl;
+    const fileUrl = metadata.videoUrl || metadata.imgUrl;
 
-    let extension = fileUrl.match(/\....\?/)[0].substr(1, 3);
+    const extension = fileUrl.match(/\....\?/)[0].substr(1, 3);
 
-    let filename = `${metadata.profileName} ${metadata.time}.${extension}`;
+    const filename = `${metadata.profileName} ${metadata.time}.${extension}`;
 
     browser.downloads.download({
         url: fileUrl,
@@ -20,14 +21,11 @@ function downloadPic(metadata) {
  */
 class CSConnector {
     /**
-     * Map contains pairs tab - port
-     */
-    tabPortsMap = new Map();
-
-    /**
      * Make onConnect listen to new content script
      */
     constructor() {
+        this.tabPortsMap = new Map();
+
         browser.runtime.onConnect.addListener(this.onConnect.bind(this));
         browser.tabs.onRemoved.addListener(this.onRemoved.bind(this));
     }
@@ -36,7 +34,7 @@ class CSConnector {
      * Called on opening new instagram tab
      */
     onConnect(port) {
-        let tabId = port.sender.tab.id;
+        const tabId = port.sender.tab.id;
         this.tabPortsMap.set(tabId, port);
 
         port.onMessage.addListener(this._onPortMessage.bind(this));
